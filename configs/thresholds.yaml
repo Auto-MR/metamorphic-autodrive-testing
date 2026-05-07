@@ -1,0 +1,4 @@
+# Pass/fail thresholds for robustness scoring
+global_pass_threshold: 0.80
+per_model_pass_threshold: 0.75
+per_mr_fail_alert: 0.50

@@ -1,0 +1,27 @@
+mrs:
+  # Steering Regression MRs
+  flip_symmetry_steering:
+    tolerance: 0.10
+  small_lane_shift_invariance:
+    tolerance: 0.15
+  brightness_steering:
+    tolerance: 0.10
+  weather_robustness:
+    tolerance: 0.20
+  temporal_smoothness:
+    tolerance: 0.08
+  constant_curvature_consistency:
+    tolerance: 0.05
+  occlusion_robustness:
+    tolerance: 0.18
+  lane_center_shift_consistency:
+    tolerance: 0.25
+  perspective_scaling:
+    tolerance: 0.12
+  straight_road_stability:
+    tolerance: 0.05
+
+  smoothness_steering:
+    tolerance: 0.15
+  translation_consistency:
+    tolerance: 0.50

@@ -1,0 +1,14 @@
+models:
+  cnn_depth:
+    input_shape: [128, 128, 3]
+    weights: models/cnn_depth/weights/
+  lstm_trajectory:
+    seq_len: 10
+    pred_len: 5
+    weights: models/lstm_trajectory/weights/
+  steering_regression:
+    input_shape: [64, 64, 3]
+    #weights: models/steering_regression/weights/
+    
+    weights: C:\Users\user\Downloads\dave2\Autopilot-TensorFlow\save\model.ckpt # ← Real path
+    model_type: "pytorch"          # or "tensorflow", "onnx", etc.
