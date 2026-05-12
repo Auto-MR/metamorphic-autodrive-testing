@@ -1,0 +1,21 @@
+[theme]
+base = "light"     # or "dark"
+
+primaryColor = "#00a761"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f0f7ff"
+textColor = "#1f2a44"
+
+# This is what you want — full override of diverging colors with blues
+chartDivergingColors = [
+    "#0a1428",   # Almost black blue
+    "#0f1f3d",   # Very dark navy
+    "#132b5c",   # Deep dark blue
+    "#1c4a8c",   # Dark blue
+    "#2a6ec1",   # Medium-dark blue
+    "#4a9eff",   # Midpoint - brighter blue
+    "#2a6ec1",   # Medium-dark blue
+    "#1c4a8c",   # Dark blue
+    "#132b5c",   # Deep dark blue
+    "#0f1f3d"    # Very dark navy
+]
