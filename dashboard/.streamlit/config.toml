@@ -1,10 +1,10 @@
 [theme]
 base = "light"     # or "dark"
 
-primaryColor = "#00a761"
+primaryColor = "#413d3d"
 backgroundColor = "#ffffff"
 secondaryBackgroundColor = "#f0f7ff"
-textColor = "#1f2a44"
+textColor = "#0f1f3d"
 
 # This is what you want — full override of diverging colors with blues
 chartDivergingColors = [

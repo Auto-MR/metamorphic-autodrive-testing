@@ -95,7 +95,7 @@ def _status_badge(passed: bool) -> str:
 
 def _score_color(score: float) -> str:
     if score >= 0.8:
-        return "#2c7a47"
+        return "#479baa"
     if score >= 0.5:
         return "#290ad8"
     return "#c0392b"
@@ -141,7 +141,7 @@ def _apply_academic_styling():
     }
     
     h1 {
-        border-bottom: 2px solid #2c7a47;
+        border-bottom: 2px solid #479baa;
         padding-bottom: 0.5rem;
     }
     
@@ -185,7 +185,7 @@ def _apply_academic_styling():
     
     /* Status indicators */
     .status-pass {
-        color: #2c7a47;
+        color: #479baa;
         font-weight: 600;
     }
     
@@ -218,7 +218,7 @@ def _apply_academic_styling():
     
     /* Progress bars */
     .stProgress > div > div {
-        background-color: #2c7a47;
+        background-color: #479baa;
     }
     
     /* Buttons */
@@ -232,7 +232,7 @@ def _apply_academic_styling():
     }
     
     .stButton > button:hover {
-        background-color: #2c7a47;
+        background-color: #479baa;
         color: white;
     }
     
@@ -361,7 +361,7 @@ def _section_registry() -> None:
     for info in registry.list_models():
         framework_label = info["framework"]
         status = "Ready" if info["loaded"] else f"Error: {info['error']}"
-        status_color = "#2c7a47" if info["loaded"] else "#c0392b"
+        status_color = "#1c9ba0" if info["loaded"] else "#c0392b"
         
         with st.expander(f"[{framework_label}] {info['name']} — {status}"):
             c1, c2, c3, c4 = st.columns(4)
@@ -468,7 +468,7 @@ def _section_single_test(tolerance: float) -> None:
 
         # Calculate delta and determine color
         delta = y_trans - y_orig
-        delta_color = "#2c7a47" if delta > 0 else "#c0392b"
+        delta_color = "#479baa" if delta > 0 else "#c0392b"
         
         c1, c2, c3, c4 = st.columns(4)
         c1.markdown(f"<div class='academic-metric'><div class='academic-metric-label'>θ original</div><div class='academic-metric-value'>{y_orig:.4f}</div></div>", unsafe_allow_html=True)
@@ -487,7 +487,7 @@ def _section_single_test(tolerance: float) -> None:
             if not cat_res:
                 continue
             n_pass = sum(r.passed for r in cat_res)
-            pass_color = "#2c7a47" if n_pass == len(cat_res) else ("#290ad8" if n_pass > 0 else "#c0392b")
+            pass_color = "#479baa" if n_pass == len(cat_res) else ("#290ad8" if n_pass > 0 else "#c0392b")
             
             st.markdown(
                 f"<div style='margin-top:0.75rem; margin-bottom:0.5rem;'>"
@@ -619,13 +619,13 @@ def _section_cross_compare(tolerance: float) -> None:
 
         def _style_dataframe(val):
             if val == "✓":
-                return "background-color: #2c7a4720; color: #2c7a47; font-weight: 500;"
+                return "background-color: #479baa20; color: #479baa; font-weight: 500;"
             if val == "✗":
                 return "background-color: #c0392b20; color: #c0392b; font-weight: 500;"
             if "%" in str(val):
                 p = float(str(val).strip("%")) / 100
                 if p >= 0.8:
-                    return "color: #2c7a47; font-weight: 600;"
+                    return "color: #479baa; font-weight: 600;"
                 elif p >= 0.6:
                     return "color: #290ad8; font-weight: 600;"
                 else:
@@ -819,11 +819,11 @@ def _section_sweep(tolerance: float) -> None:
         mc2.markdown(f"<div class='academic-metric'><div class='academic-metric-label'>Max pass rate</div><div class='academic-metric-value'>{max(result.pass_rates):.1%}</div></div>", unsafe_allow_html=True)
         
         degrade_text = f"{ct}{cfg['unit']}" if ct is not None else "None"
-        degrade_color = "#2c7a47" if ct is None else "#290ad8"
+        degrade_color = "#479baa" if ct is None else "#290ad8"
         mc3.markdown(f"<div class='academic-metric'><div class='academic-metric-label'>Degradation at</div><div class='academic-metric-value' style='color:{degrade_color};'>{degrade_text}</div></div>", unsafe_allow_html=True)
         
         collapse_text = f"{ct2}{cfg['unit']}" if ct2 is not None else "None"
-        collapse_color = "#2c7a47" if ct2 is None else "#c0392b"
+        collapse_color = "#479baa" if ct2 is None else "#c0392b"
         mc4.markdown(f"<div class='academic-metric'><div class='academic-metric-label'>Collapse at</div><div class='academic-metric-value' style='color:{collapse_color};'>{collapse_text}</div></div>", unsafe_allow_html=True)
 
         # ── Degradation curve ─────────────────────────────────────────────────
