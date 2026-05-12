@@ -1,4 +1,22 @@
-# Pass/fail thresholds for robustness scoring
+# Statistical thresholds — formula: ε = fraction × steering_range
+# steering_range = 2.0 (from -1 to +1)
+# Do NOT hardcode per-model thresholds; use these dataset-based values.
+
+steering_range: 2.0
+default_fraction: 0.05
+default_epsilon: 0.10      # = 0.05 × 2.0
+
+# Pass/fail thresholds for scoring
 global_pass_threshold: 0.80
 per_model_pass_threshold: 0.75
 per_mr_fail_alert: 0.50
+
+# Generalization thresholds
+high_generalization: 0.80    # ≥80% models pass = generalizable MR
+low_generalization: 0.40     # <40% models pass = model-specific MR
+
+# Category-level expected pass rates (for research analysis)
+category_A_expected: 0.85    # Invariance MRs — usually high
+category_B_expected: 0.90    # Symmetry MRs — should be universal
+category_C_expected: 0.75    # Temporal MRs — architecture-dependent
+category_D_expected: 0.65    # Composition MRs — most challenging

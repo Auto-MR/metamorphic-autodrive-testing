@@ -1,14 +1,55 @@
+# Model configurations for cross-model generalization study
+# All models share the same MR framework
+
 models:
+  dave2_cnn:
+    type: deep_learning
+    architecture: CNN (DAVE-2)
+    input_shape: [66, 200, 3]
+    weights: models/steering_regression/weights/model.ckpt
+    adapter: SteeringAdapter
+
+  gpr_steering:
+    type: probabilistic
+    architecture: Gaussian Process Regression
+    input_shape: [66, 200, 3]
+    weights: models/steering_regression/weights/gpr_steering_model.pkl
+    adapter: GPRSteeringAdapter
+    extra: supports predict_with_uncertainty()
+
+  svr_steering:
+    type: classical_ml
+    architecture: Support Vector Regression
+    input_shape: [66, 200, 3]
+    weights: models/steering_regression/weights/svr_steering_model.pkl
+    adapter: SVRSteeringAdapter
+
+  random_forest:
+    type: ensemble
+    architecture: Random Forest Regressor
+    input_shape: [66, 200, 3]
+    weights: models/steering_regression/weights/rf_steering_model.pkl
+    adapter: RFSteeringAdapter
+
+  linear_baseline:
+    type: linear
+    architecture: Linear Regression
+    input_shape: [66, 200, 3]
+    weights: models/steering_regression/weights/linear_steering_model.pkl
+    adapter: LinearSteeringAdapter
+
+  # Additional models (non-steering)
   cnn_depth:
+    type: deep_learning
+    architecture: CNN (depth estimation)
     input_shape: [128, 128, 3]
     weights: models/cnn_depth/weights/
+    adapter: CNNAdapter
+
   lstm_trajectory:
+    type: recurrent
+    architecture: LSTM trajectory prediction
     seq_len: 10
     pred_len: 5
     weights: models/lstm_trajectory/weights/
-  steering_regression:
-    input_shape: [64, 64, 3]
-    #weights: models/steering_regression/weights/
-    
-    weights: C:\Users\user\Downloads\dave2\Autopilot-TensorFlow\save\model.ckpt # ← Real path
-    model_type: "pytorch"          # or "tensorflow", "onnx", etc.
+    adapter: LSTMAdapter
