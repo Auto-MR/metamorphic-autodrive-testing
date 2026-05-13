@@ -80,6 +80,13 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+    [data-testid="stSidebar"] { display: none; }
+    [data-testid="collapsedControl"] { display: none; }
+</style>
+""", unsafe_allow_html=True)
+
 # City background — NO HTML comments inside this block
 st.markdown(
     '<div class="city-bg">'
@@ -125,9 +132,7 @@ st.markdown(
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
     if st.button("🚀 Start Testing Now", use_container_width=True, key="start_testing"):
-        st.info("Navigate to the testing dashboard to begin metamorphic testing on autonomous driving models.")
-        st.markdown("---")
-        st.success("Ready to start testing? The full dashboard will be available in the next version.")
+        st.switch_page("pages/App.py")
 
 st.markdown("---")
 st.markdown(
