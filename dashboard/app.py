@@ -775,6 +775,9 @@ elif page == "Parametric Sweep":
     col2.markdown(f"<div class='academic-metric'><div class='academic-metric-label'>Intensity Range</div><div class='academic-metric-value'>{default_vals[0]}{cfg['unit']}</div><div class='academic-metric-label'>to {default_vals[-1]}{cfg['unit']} ({len(default_vals)} levels)</div></div>", unsafe_allow_html=True)
     col3.markdown(f"<div class='academic-metric'><div class='academic-metric-label'>Statistical ε</div><div class='academic-metric-value'>{sweep_tolerance:.2f}</div><div class='academic-metric-label'>0.05 × steering range</div></div>", unsafe_allow_html=True)
 
+    # Add spacing before the button
+    st.markdown("<br><br>", unsafe_allow_html=True)
+
     # ── Run sweep ─────────────────────────────────────────────────────────────
     if st.button("Run Sensitivity Analysis", type="primary"):
 
