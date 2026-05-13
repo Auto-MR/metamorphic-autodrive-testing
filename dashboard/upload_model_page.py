@@ -270,7 +270,12 @@ def _section_upload() -> None:
     st.markdown("""
     <div style='background:#f8fafc; padding:1rem; border-radius:8px; margin-bottom:1rem; font-size:0.85rem;'>
     <b>Supported formats:</b> pickle (.pkl, .joblib) | Keras/TensorFlow (.h5, .keras) | 
-    PyTorch (.pt, .pth) | ONNX (.onnx)
+    PyTorch (.pt, .pth) | ONNX (.onnx) | TF Checkpoint bundle (.zip)<br>
+    <span style='color:#475569;'>
+    ⓘ For TensorFlow <code>.ckpt</code> checkpoints, zip all companion files together:<br>
+    &nbsp;&nbsp;&nbsp;<code>zip model_ckpt.zip model.ckpt.meta model.ckpt.index model.ckpt.data-00000-of-00001</code><br>
+    &nbsp;&nbsp;&nbsp;Or zip a SavedModel directory: <code>zip -r saved_model.zip saved_model/</code>
+    </span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -279,8 +284,8 @@ def _section_upload() -> None:
     with col_up:
         uploaded_file = st.file_uploader(
             "Model file",
-            type=["pkl", "joblib", "h5", "keras", "pt", "pth", "onnx"],
-            help="Maximum file size: 500 MB. For PyTorch, use torch.save(model, path) not state_dict.",
+            type=["pkl", "joblib", "h5", "keras", "pt", "pth", "onnx", "zip"],
+            help="Maximum file size: 500 MB. For PyTorch, use torch.save(model, path) not state_dict. For TF checkpoints, zip the .meta/.index/.data-* files together.",
         )
 
     with col_cfg:
