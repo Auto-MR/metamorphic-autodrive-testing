@@ -1,8 +1,13 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import sys
 import os
 import inspect
+import base64
 
+# ──────────────────────────────────────────────────────────────────────────────
+#  PROJECT ROOT + DYNAMIC COUNTS
+# ──────────────────────────────────────────────────────────────────────────────
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
@@ -36,207 +41,650 @@ model_count = len(MODEL_OPTIONS)
 transform_count = len(TRANSFORM_OPTIONS)
 mr_category_count = 4
 
-import streamlit as st
-
+# ──────────────────────────────────────────────────────────────────────────────
+#  PAGE CONFIG
+# ──────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="AutoMR | Metamorphic Testing Framework",
-    page_icon="🔬",
+    page_icon="🛰️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
+# ──────────────────────────────────────────────────────────────────────────────
+#  GLOBAL CSS — design tokens: dark instrumentation panel + signal/scan accents
+# ──────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    :root {
+        --bg-base: #0A0E17;
+        --bg-panel: #121826;
+        --bg-panel-alt: #182236;
+        --accent-signal: #FF6B35;
+        --accent-signal-soft: rgba(255, 107, 53, 0.16);
+        --accent-scan: #19D3C5;
+        --accent-scan-soft: rgba(25, 211, 197, 0.16);
+        --accent-indigo: #6C7BFF;
+        --accent-rose: #FF5C7A;
+        --text-primary: #1D3354;
+        --text-secondary: #EDF1F7;
+        --text-muted: #8A93A6;
+        --border-hairline: #232C42;
+    }
+
+    html { scroll-behavior: smooth; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    .main { font-family: 'Inter', sans-serif; background: linear-gradient(145deg, #b2e0fa 0%, #7ec8e0 100%); }
-    .city-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; overflow: hidden; pointer-events: none; }
-    .sky { position: absolute; width: 100%; height: 100%; background: radial-gradient(circle at 30% 20%, #ffdd99, #6fc3df); }
-    .sun { position: absolute; top: 8%; right: 8%; width: 100px; height: 100px; background: radial-gradient(circle, #ffec80, #ffb347); border-radius: 50%; filter: blur(3px); box-shadow: 0 0 50px rgba(255,200,100,0.8); animation: floatSun 10s infinite alternate ease-in-out; }
-    @keyframes floatSun { 0% { transform: translateY(0px); } 100% { transform: translateY(20px); } }
-    .cloud { position: absolute; background: rgba(255,255,245,0.85); border-radius: 80% 20% 75% 25% / 60% 55% 45% 40%; filter: blur(15px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); animation: floatCloud 20s infinite ease-in-out; }
-    @keyframes floatCloud { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(30px); } }
-    .building { position: absolute; bottom: 180px; background: linear-gradient(135deg, #2c3e66, #1a2a4a); border-top-left-radius: 12px; border-top-right-radius: 12px; box-shadow: -5px 0 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15); }
-    .building::before { content: ""; position: absolute; top: 12%; left: 10%; width: 80%; height: 25%; background: repeating-linear-gradient(90deg, rgba(255,235,150,0.6) 0px, rgba(255,235,150,0.6) 2px, transparent 2px, transparent 12px); border-radius: 8px; }
-    .road { position: fixed; bottom: 0; width: 100%; height: 240px; background: #2c2f36; z-index: 5; box-shadow: 0 -8px 25px rgba(0,0,0,0.4); border-top: 3px solid #ffb347; }
-    .road-lane { position: absolute; width: 100%; top: 50%; height: 6px; background: repeating-linear-gradient(90deg, #FFE484, #FFE484 40px, transparent 40px, transparent 80px); transform: translateY(-50%); animation: roadMove 1s linear infinite; }
-    @keyframes roadMove { from { background-position-x: 0; } to { background-position-x: -120px; } }
-    .cars-layer { position: fixed; bottom: 110px; left: 0; width: 100%; height: 100px; z-index: 20; pointer-events: none; }
-    .vehicle { position: absolute; width: 140px; height: 50px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
-    .vehicle::before, .vehicle::after { content: ""; position: absolute; bottom: -12px; width: 24px; height: 24px; background: #111; border: 4px solid #666; border-radius: 50%; }
-    .vehicle::before { left: 18px; }
-    .vehicle::after { right: 18px; }
-    .car1 { background: linear-gradient(to right, #ff5f6d, #ff9966); animation: drive1 12s linear infinite; }
-    .bus { width: 190px; height: 60px; background: linear-gradient(to right, #2563eb, #38bdf8); animation: drive2 18s linear infinite; }
-    .truck { width: 210px; background: linear-gradient(to right, #10b981, #34d399); animation: drive3 20s linear infinite; }
-    @keyframes drive1 { from { transform: translateX(-200px); } to { transform: translateX(120vw); } }
-    @keyframes drive2 { from { transform: translateX(120vw); } to { transform: translateX(-300px); } }
-    @keyframes drive3 { from { transform: translateX(-350px); } to { transform: translateX(120vw); } }
-    .hero { text-align: center; padding: 1rem 1rem 1.5rem 1rem; position: relative; z-index: 15; }
-    .hero h1 { font-size: 4.8rem; font-weight: 800; background: linear-gradient(135deg, #0f172a, #1e293b); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: -0.02em; animation: fadeSlideUp 0.8s ease; }
-    @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-    .hero-subtitle { font-size: 1.3rem; font-weight: 500; color: #0a2540; max-width: 800px; margin: 1rem auto; background: rgba(255,255,245,0.4); backdrop-filter: blur(12px); padding: 0.6rem 1.8rem; border-radius: 60px; display: inline-block; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .overview { background: rgba(255,255,255,0.92); backdrop-filter: blur(14px); padding: 2rem 2.5rem; border-radius: 24px; margin: 1.5rem auto; max-width: 950px; box-shadow: 0 25px 45px -12px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,200,0.5); position: relative; z-index: 15; transition: transform 0.25s ease; }
-    .overview:hover { transform: scale(1.01); }
-    .stButton > button { font-size: 1.6rem; font-weight: 700; padding: 1.2rem 3.5rem; border-radius: 60px; background: linear-gradient(105deg, #ff8c42, #ff5e00); color: white; box-shadow: 0 18px 35px rgba(255,94,0,0.35); transition: all 0.25s ease; border: none; }
-    .stButton > button:hover { transform: scale(1.06); box-shadow: 0 22px 40px rgba(255,94,0,0.55); background: linear-gradient(105deg, #ff9a55, #ff6a20); }
-    footer { text-align: center; padding: 2rem; color: #ffffff; background: rgba(0,0,0,0.08); backdrop-filter: blur(5px); margin-top: 2rem; position: relative; z-index: 15; font-weight: 500; }
 
-    /* Stats strip */
-    .stats-strip { display: flex; justify-content: center; gap: 1.6rem; flex-wrap: wrap; margin: 1.2rem auto; max-width: 1100px; position: relative; z-index: 15; }
-    .stat-pill { background: rgba(255,255,255,0.85); backdrop-filter: blur(10px); border-radius: 22px; padding: 1.4rem 2.2rem; text-align: center; min-width: 180px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.6); transition: transform 0.2s ease; }
-    .stat-pill:hover { transform: translateY(-4px); }
-    .stat-num { font-size: 2.2rem; font-weight: 800; color: #ff5e00; line-height: 1; }
-    .stat-label { font-size: 1rem; font-weight: 600; color: #1f2a3f; margin-top: 0.3rem; letter-spacing: 0.02em; }
+    .main {
+        font-family: 'Inter', sans-serif;
+        background:
+            radial-gradient(circle at 18% 12%, rgba(25,211,197,0.07), transparent 38%),
+            radial-gradient(circle at 84% 6%, rgba(255,107,53,0.06), transparent 42%),
+            linear-gradient(var(--bg-base), var(--bg-base));
+        color: var(--text-primary);
+    }
 
-    /* How it works */
-    .how-section { max-width: 920px; margin: 1.5rem auto; position: relative; z-index: 15; min-height: 10vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-    .how-title { text-align: center; color: #0a2540; font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem; text-shadow: 0 2px 8px rgba(255,255,255,0.5); background: rgba(255,255,245,0.4); backdrop-filter: blur(20px); padding: 0.6rem 1.8rem; border-radius: 60px; display: inline-block; box-shadow: 0 4px 12px rgba(0,0,0,0.1);}
-    .how-steps { display: flex; justify-content: center; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
-    .how-step { background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); border-radius: 20px; padding: 1rem 1.4rem; text-align: center; width: 208px; box-shadow: 0 12px 28px rgba(0,0,0,0.15); }
-    .how-step-icon { font-size: 1.8rem; }
-    .how-step-title { font-weight: 700; color: #0a2540; margin-top: 0.3rem; font-size: 1.2rem; }
-    .how-step-desc { font-size: 0.9rem; color: #475569; margin-top: 0.2rem; line-height: 1.3; }
-    .how-arrow { font-size: 1.6rem; color: #ff5e00; font-weight: 800; }
+    /* faint engineering grid backdrop */
+    .grid-bg {
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background-image:
+            linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+        background-size: 42px 42px;
+        mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,0,0,0.9), transparent 75%);
+    }
 
-    /* Feature cards */
-    .features-title { text-align: center; color: #0a2540; font-size: 1.5rem; font-weight: 800; margin: 1.8rem auto 1rem; text-shadow: 0 2px 8px rgba(255,255,255,0.5); position: relative; z-index: 15; }
-    .feature-card { background: rgba(255,255,255,0.92); backdrop-filter: blur(12px); border-radius: 20px; padding: 1.3rem 1.2rem; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.6); height: 100%; transition: transform 0.2s ease, box-shadow 0.2s ease; }
-    .feature-card:hover { transform: translateY(-6px); box-shadow: 0 20px 38px rgba(0,0,0,0.25); }
-    .feature-icon { font-size: 2rem; }
-    .feature-title { font-weight: 700; color: #0a2540; font-size: 1.05rem; margin-top: 0.4rem; }
-    .feature-desc { font-size: 0.82rem; color: #475569; margin-top: 0.4rem; line-height: 1.4; min-height: 55px; }
-    div[data-testid="column"] .stButton > button { font-size: 0.95rem !important; font-weight: 600 !important; padding: 0.5rem 1.2rem !important; border-radius: 30px !important; box-shadow: 0 8px 18px rgba(255,94,0,0.3) !important; width: 100%; margin-top: 0.5rem; }
-</style>
-""", unsafe_allow_html=True)
+    a { color: inherit; }
+    .eyebrow {
+        font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; font-weight: 500;
+        letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent-scan);
+        display: flex; align-items: center; gap: 0.5rem; justify-content: center; margin-bottom: 0.6rem;
+    }
+    .eyebrow::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-scan); box-shadow: 0 0 8px var(--accent-scan); }
+    .section-heading { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 2.1rem; text-align: center; color: var(--text-primary); margin-bottom: 0.5rem; }
+    .section-sub { text-align: center; color: var(--text-muted); font-size: 1rem; max-width: 620px; margin: 0 auto 2.2rem; line-height: 1.55; }
+    .section-wrap { max-width: 1100px; margin: 3.4rem auto 0; position: relative; z-index: 5; padding: 0 1rem; }
 
-st.markdown("""
-<style>
-    /* Push Streamlit's main block up so it overlays the city bg */
+    /* ── Sticky Navbar ── */
+    .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+
+    background: rgba(10,14,23,0.82);
+    backdrop-filter: blur(14px);
+
+    border-bottom: 1px solid var(--border-hairline);
+
+    z-index: 1000;
+
+    padding: 0.9rem 2.4rem;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    }
+    .navbar-logo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.15rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.55rem; }
+    .navbar-logo .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent-signal); box-shadow: 0 0 10px var(--accent-signal); }
+    .navbar-links { display: flex; gap: 2rem; }
+    .navbar-links a {
+        text-decoration: none; color: var(--text-muted); font-weight: 500; font-size: 0.82rem;
+        letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s ease;
+    }
+    .navbar-links a:hover, .navbar-links a:focus-visible { color: var(--accent-scan); outline: none; }
+
+    /* ── Hero ── */
+    .hero-wrap { max-width: 1180px; margin: 0 auto; padding: 1rem 1.5rem 2rem; position: relative; z-index: 5; display: flex; align-items: center; gap: 3rem; flex-wrap: wrap; }
+    .hero-content { flex: 1 1 420px; min-width: 320px; }
+    .hero-tag { font-family: 'JetBrains Mono', monospace; font-size: 2rem; letter-spacing: 0.14em; color: var(--accent-signal); text-transform: uppercase; margin-bottom: 1rem; display: inline-block; padding: 0.35rem 0.9rem; border: 1px solid rgba(255,107,53,0.35); border-radius: 30px; background: var(--accent-signal-soft); }
+    .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 3.6rem; font-weight: 800; line-height: 1.05; color: var(--text-primary); letter-spacing: -0.01em; margin-bottom: 1rem; animation: fadeSlideUp 0.7s ease; }
+    .hero h1 span { color: var(--accent-scan); }
+    @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .hero-subtitle { font-size: 1.08rem; font-weight: 400; color: var(--text-muted); max-width: 480px; line-height: 1.65; margin-bottom: 1.8rem; }
+    .hero-ctas { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+    .ghost-btn { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9rem; color: var(--text-primary); border: 1px solid var(--border-hairline); padding: 0.8rem 1.6rem; border-radius: 10px; text-decoration: none; transition: all 0.2s ease; }
+    .ghost-btn:hover, .ghost-btn:focus-visible { border-color: var(--accent-scan); color: var(--accent-scan); outline: none; }
+
+    /* ── Radar / scan signature visual ── */
+    .hero-visual { flex: 0 0 300px; display: flex; flex-direction: column; align-items: center; }
+    .radar-panel { position: relative; width: 280px; height: 280px; }
+    .radar-ring { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 1px solid var(--border-hairline); border-radius: 50%; }
+    .radar-r1 { width: 100%; height: 100%; }
+    .radar-r2 { width: 68%; height: 68%; }
+    .radar-r3 { width: 36%; height: 36%; }
+    .radar-cross::before, .radar-cross::after { content: ""; position: absolute; background: var(--border-hairline); }
+    .radar-cross::before { top: 0; left: 50%; width: 1px; height: 100%; }
+    .radar-cross::after { top: 50%; left: 0; width: 100%; height: 1px; }
+    .radar-sweep { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, var(--accent-scan-soft), transparent 32%); animation: radarSpin 4.2s linear infinite; }
+    @keyframes radarSpin { to { transform: rotate(360deg); } }
+    .radar-blip { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-scan); animation: blipPulse 2.6s ease-in-out infinite; }
+    .radar-blip.flagged { background: var(--accent-signal); animation-name: blipPulseFlag; }
+    .b1 { top: 26%; left: 64%; animation-delay: 0s; }
+    .b2 { top: 58%; left: 28%; animation-delay: 0.7s; }
+    .b3 { top: 72%; left: 66%; animation-delay: 1.4s; }
+    .b4 { top: 36%; left: 40%; animation-delay: 2.1s; }
+    @keyframes blipPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(25,211,197,0.45); } 50% { box-shadow: 0 0 0 9px rgba(25,211,197,0); } }
+    @keyframes blipPulseFlag { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,53,0.45); } 50% { box-shadow: 0 0 0 9px rgba(255,107,53,0); } }
+    .radar-caption { margin-top: 1.3rem; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; color: var(--text-muted); text-transform: uppercase; }
+
+    /* ── Telemetry strip ── */
+    .telemetry { background: var(--bg-panel); border: 1px solid var(--border-hairline); border-radius: 16px; display: flex; max-width: 1100px; margin: 1rem auto 0; position: relative; z-index: 5; overflow: hidden; }
+    .telemetry-item { flex: 1; text-align: center; padding: 1.4rem 1rem; border-right: 1px solid var(--border-hairline); }
+    .telemetry-item:last-child { border-right: none; }
+    .telemetry-num { font-family: 'JetBrains Mono', monospace; font-size: 2.1rem; font-weight: 600; color: var(--accent-scan); }
+    .telemetry-label { font-size: 0.74rem; font-weight: 500; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.3rem; }
+
+    /* ── Panels (overview / about) ── */
+    .panel { background: var(--bg-panel); border: 1px solid var(--border-hairline); border-radius: 18px; padding: 2.4rem 2.6rem; max-width: 1000px; margin: 0 auto; position: relative; z-index: 5; }
+    .panel p { font-size: 1.02rem; line-height: 1.75; color: var(--text-muted); margin-top: 0.9rem; }
+    .panel p:first-of-type { margin-top: 0; }
+    .panel strong { color: var(--text-secondary); }
+
+    /* ── Pipeline (how it works) ── */
+    .pipeline { display: flex; justify-content: center; align-items: stretch; gap: 0; flex-wrap: wrap; background: var(--bg-panel); border: 1px solid var(--border-hairline); border-radius: 18px; overflow: hidden; }
+    .pipe-step { flex: 1; min-width: 200px; padding: 1.8rem 1.5rem; border-right: 1px solid var(--border-hairline); position: relative; }
+    .pipe-step:last-child { border-right: none; }
+    .pipe-num { font-family: 'JetBrains Mono', monospace; color: var(--accent-signal); font-size: 0.85rem; font-weight: 600; letter-spacing: 0.05em; }
+    .pipe-title { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 1.05rem; color: var(--text-secondary); margin: 0.5rem 0 0.4rem; }
+    .pipe-desc { font-size: 0.86rem; color: var(--text-muted); line-height: 1.5; }
+
+    /* ── Capability / model cards ── */
+    .feature-card { background: var(--bg-panel); border: 1px solid var(--border-hairline); border-top: 2px solid transparent; border-radius: 14px; padding: 1.5rem 1.3rem; height: 100%; transition: border-color 0.2s ease, transform 0.2s ease; margin-bottom: 1.1rem; }
+    .feature-card:hover { border-top-color: var(--accent-scan); transform: translateY(-4px); }
+    .feature-icon { font-size: 1.5rem; }
+    .feature-title { font-family: 'Space Grotesk', sans-serif; font-weight: 600; color: var(--text-secondary); font-size: 1.02rem; margin-top: 0.6rem; }
+    .feature-desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.45rem; line-height: 1.5; min-height: 58px; }
+
+    .model-card { background: var(--bg-panel); border: 1px solid var(--border-hairline); border-radius: 14px; padding: 1.3rem 1rem; text-align: center; height: 100%; transition: transform 0.2s ease, border-color 0.2s ease; }
+    .model-card:hover { transform: translateY(-4px); border-color: var(--accent-scan); }
+    .model-card .feature-icon { font-size: 1.6rem; }
+    .model-name { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.92rem; color: var(--text-secondary); margin-top: 0.5rem; }
+    .model-tag { display: inline-block; margin-top: 0.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent-scan); background: var(--accent-scan-soft); padding: 0.22rem 0.6rem; border-radius: 30px; }
+
+    .idx-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--accent-signal);
+    background: var(--accent-signal-soft);
+    border: 1px solid rgba(255,107,53,0.28);
+    padding: 0.28rem 0.6rem;
+    border-radius: 6px;
+    }
+    .model-card .idx-tag { color: var(--accent-scan); background: var(--accent-scan-soft); border-color: rgba(25,211,197,0.28); }
+    .link-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em; color: var(--accent-scan); margin-right: 0.45rem; }
+
+
+    /* ── MR category spec cards ── */
+    .cat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.1rem; }
+    .cat-card { background: var(--bg-panel); border: 1px solid var(--border-hairline); border-top: 3px solid var(--cat-color); border-radius: 14px; padding: 1.5rem; }
+    .cat-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cat-color); }
+    .cat-card h4 { font-family: 'Space Grotesk', sans-serif; font-size: 1.12rem; color: var(--text-secondary); margin: 0.4rem 0 0.6rem; }
+    .cat-card p { font-size: 0.86rem; color: var(--text-muted); line-height: 1.55; }
+    .cat-formula { font-family: 'JetBrains Mono', monospace; background: var(--bg-panel-alt); border: 1px solid var(--border-hairline); color: var(--cat-color); padding: 0.45rem 0.7rem; border-radius: 8px; display: inline-block; margin-top: 0.9rem; font-size: 0.78rem; }
+
+    /* ── Tech stack badges ── */
+    .stack-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.7rem; }
+    .stack-pill { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--text-secondary); background: var(--bg-panel); border: 1px solid var(--border-hairline); padding: 0.6rem 1.2rem; border-radius: 30px; transition: border-color 0.2s ease, transform 0.2s ease; }
+    .stack-pill:hover { border-color: var(--accent-signal); transform: translateY(-3px); }
+
+    /* ── About / author row ── */
+    .about-grid { display: flex; gap: 2.2rem; flex-wrap: wrap; margin-top: 1.6rem; }
+    .about-item-label { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-scan); }
+    .about-item-value { font-size: 0.98rem; color: var(--text-secondary); margin-top: 0.25rem; font-weight: 500; }
+    .about-links { margin-top: 1.4rem; display: flex; gap: 1.2rem; }
+    .about-links a { font-size: 0.9rem; font-weight: 600; color: var(--accent-signal); text-decoration: none; }
+    .about-links a:hover, .about-links a:focus-visible { color: var(--accent-scan); outline: none; }
+
+    /* ── CTA band ── */
+    .cta-band { text-align: center; background: linear-gradient(135deg, var(--bg-panel), var(--bg-panel-alt)); border: 1px solid var(--border-hairline); border-radius: 20px; padding: 3rem 2rem; max-width: 1000px; margin: 0 auto; position: relative; z-index: 5; }
+    .cta-band h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.7rem; color: var(--text-secondary); margin-bottom: 0.6rem; }
+    .cta-band p { color: var(--text-muted); margin-bottom: 1.6rem; }
+
+    /* ── Buttons (Streamlit) ── */
+    .stButton > button {
+        font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 600; padding: 0.95rem 2.4rem; border-radius: 10px;
+        background: var(--accent-signal); color: #0A0E17; box-shadow: 0 10px 26px rgba(255,107,53,0.25);
+        transition: all 0.2s ease; border: none;
+    }
+    .stButton > button:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(255,107,53,0.4); background: #ff7a4d; }
+    .stButton > button:focus-visible { outline: 2px solid var(--accent-scan); outline-offset: 2px; }
+
+    /* ── Footer ── */
     .block-container {
-        position: relative;
-        z-index: 15;
-        padding-top: 0 !important;
-        margin-top: 0 !important;
-        background: transparent !important;
-    }
+    padding-bottom: 0rem !important;
+}
 
-    /* Hide default Streamlit scrollable wrapper padding */
-    section[data-testid="stAppViewContainer"] {
-        background: transparent !important;
-        overflow: hidden !important;
-    }
+    footer {
+    text-align: center;
+    padding: 2.4rem 1rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border-hairline);
+    margin-top: 3.5rem;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    position: relative;
+    z-index: 5;
+    font-size: 0.85rem;
+    background: rgba(10,14,23,0.82);
+    backdrop-filter: blur(14px);
+}
 
-    section[data-testid="stMain"] {
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-    }
+footer .footer-links { margin-bottom: 0.8rem; }
+footer .footer-links a,
+footer a:link,
+footer a:visited {
+    color: var(--text-muted) !important;
+    text-decoration: none !important;
+    margin: 0 0.7rem;
+    font-weight: 500;
+}
+footer a:hover, footer a:focus-visible { color: var(--accent-scan) !important; outline: none; }
 
-    /* Fix the content area to viewport, allow scroll for added sections */
-    .main .block-container {
-        max-width: 100% !important;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding-bottom: 2rem;
+    .anchor { position: relative; top: -80px; visibility: hidden; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .radar-sweep, .radar-blip, .hero h1 { animation: none !important; }
+    }
+    @media (max-width: 768px) {
+        .hero h1 { font-size: 2.5rem; }
+        .telemetry { flex-wrap: wrap; }
+        .telemetry-item { flex: 1 1 45%; border-right: none; border-bottom: 1px solid var(--border-hairline); }
     }
 </style>
 """, unsafe_allow_html=True)
 
+# Layout fixes for Streamlit containers
 st.markdown("""
 <style>
+    .block-container {
+    position: relative;
+    z-index: 5;
+    padding-top: 70px !important;   /* was 0 — pushes content below fixed navbar */
+    margin-top: 0 !important;
+    background: transparent !important;}
+    section[data-testid="stAppViewContainer"] { background: transparent !important; }
+    section[data-testid="stMain"] { overflow-y: visible !important; overflow-x: hidden !important; }
+    .main .block-container { max-width: 100% !important; display: flex; flex-direction: column; align-items: center; padding-bottom: 0; }
     [data-testid="stSidebar"] { display: none; }
     [data-testid="collapsedControl"] { display: none; }
+            
+    /* keep Streamlit's top header from covering the fixed navbar ── */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+        z-index: 1 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# City background — NO HTML comments inside this block
-st.markdown(
-    '<div class="city-bg">'
-        '<div class="sky"></div>'
-        '<div class="sun"></div>'
-        '<div class="cloud" style="width:220px;height:70px;top:180px;left:-300px;opacity:0.7;animation:floatCloud 60s linear infinite;"></div>'
-        '<div class="building" style="left:5%;width:90px;height:240px;"></div>'
-        '<div class="building" style="left:15%;width:120px;height:320px;"></div>'
-        '<div class="building" style="left:27%;width:80px;height:180px;"></div>'
-        '<div class="building" style="left:37%;width:140px;height:360px;"></div>'
-        '<div class="building" style="left:50%;width:110px;height:260px;"></div>'
-        '<div class="building" style="left:62%;width:160px;height:390px;"></div>'
-        '<div class="building" style="left:77%;width:90px;height:210px;"></div>'
-        '<div class="building" style="left:88%;width:130px;height:330px;"></div>'
-        '<div class="road"><div class="road-lane"></div></div>'
-        '<div class="cars-layer">'
-            '<div class="vehicle car1" style="bottom:20px;"></div>'
-            '<div class="vehicle bus" style="bottom:60px;"></div>'
-            '<div class="vehicle truck" style="bottom:100px;"></div>'
-        '</div>'
-    '</div>',
-    unsafe_allow_html=True
-)
+st.markdown('<div class="grid-bg"></div>', unsafe_allow_html=True)
 
-import base64
-import os
+# ──────────────────────────────────────────────────────────────────────────────
+#  STICKY NAVBAR
+# ──────────────────────────────────────────────────────────────────────────────
+st.markdown("""
+<div class="navbar">
+    <div class="navbar-logo"><span class="dot"></span> AutoMR</div>
+    <div class="navbar-links">
+        <a href="#overview">Overview</a>
+        <a href="#how">How It Works</a>
+        <a href="#capabilities">Capabilities</a>
+        <a href="#categories">MR Categories</a>
+        <a href="#models">Models</a>
+        <a href="#about">About</a>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
+# ──────────────────────────────────────────────────────────────────────────────
+#  HERO
+# ──────────────────────────────────────────────────────────────────────────────
+logo_b64 = None
 logo_path = os.path.join(os.path.dirname(__file__), "images", "logo.png")
 if os.path.exists(logo_path):
     with open(logo_path, "rb") as f:
         logo_b64 = base64.b64encode(f.read()).decode()
 
-st.markdown(
-    f'<div class="hero">'
-        f'<div style="display:flex; align-items:center; justify-content:center; gap:1rem;">'
-            f'<img src="data:image/png;base64,{logo_b64}" style="width:70px; height:70px; border-radius:50%; box-shadow:0 8px 24px rgba(0,0,0,0.25);">'
-            f'<h1 style="margin:0;">AutoMR</h1>'
-        f'</div>'
-        '<div class="hero-subtitle">Generalized Metamorphic Testing Framework for<br>Regression-Based Autonomous Driving Models</div>'
-    '</div>',
-    unsafe_allow_html=True
+logo_html = (
+    f'<img src="data:image/png;base64,{logo_b64}" style="width:46px;height:46px;border-radius:10px;margin-bottom:1rem;">'
+    if logo_b64 else ""
 )
 
 st.markdown(
-    '<div class="overview">'
-        '<h3 style="margin-top:0;color:#f97316;font-size:1.8rem;font-weight:700;">Project Overview</h3>'
-        '<p style="font-size:1.05rem;line-height:1.6;color:#1f2a3f;">AutoMR is a comprehensive framework that tests the <strong>robustness and reliability</strong> of autonomous driving models using <strong>Metamorphic Testing</strong>.</p>'
-        '<p style="font-size:1.05rem;line-height:1.6;color:#1f2a3f;margin-top:0.8rem;">It applies realistic transformations like lighting, weather, noise, and fog to driving scenes and checks whether the model maintains consistent behavior according to defined metamorphic relations.</p>'
-        '<p style="font-size:1.05rem;line-height:1.6;color:#1f2a3f;margin-top:0.8rem;">The framework helps discover hidden failures that are often missed by traditional testing methods.</p>'
-    '</div>',
+    f'''
+    <div class="hero-wrap">
+        <div class="hero-content">
+            {logo_html}
+            <span class="hero-tag">AutoMR</span>
+            <h1 class="hero">Stress-test driving<br>models like a <span>sensor sweep</span>.</h1>
+            <p class="hero-subtitle">AutoMR is a generalized metamorphic testing framework for regression-based
+            autonomous driving models - applying realistic transformations and checking whether model behavior
+            stays consistent where it should.</p>
+            <div class="hero-ctas">
+                <a href="#categories" class="ghost-btn">View MR Categories</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="radar-panel">
+                <div class="radar-ring radar-r1"></div>
+                <div class="radar-ring radar-r2"></div>
+                <div class="radar-ring radar-r3"></div>
+                <div class="radar-cross"></div>
+                <div class="radar-sweep"></div>
+                <span class="radar-blip b1"></span>
+                <span class="radar-blip flagged b2"></span>
+                <span class="radar-blip b3"></span>
+                <span class="radar-blip flagged b4"></span>
+            </div>
+            <div class="radar-caption">Scanning for relation violations</div>
+        </div>
+    </div>
+    ''',
     unsafe_allow_html=True
 )
+# # Primary CTA — a real Streamlit button (styled via .stButton CSS above) so st.switch_page works.
+# # It sits left-aligned just below the hero, under the tagline.
+# hcol1, hcol2 = st.columns([1, 2])
+# with hcol1:
+#     if st.button("Launch Test Console →", use_container_width=True, key="start_testing"):
+#         st.switch_page("pages/App.py")
 
+# ──────────────────────────────────────────────────────────────────────────────
+#  TELEMETRY STRIP
+# ──────────────────────────────────────────────────────────────────────────────
+components.html(f"""
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+    body {{ margin:0; font-family:'JetBrains Mono',monospace; background:transparent; }}
+    .telemetry {{ background:#121826; border:1px solid #232C42; border-radius:16px; display:flex; max-width:1100px; margin:0 auto; overflow:hidden; }}
+    .telemetry-item {{ flex:1; text-align:center; padding:1.4rem 1rem; border-right:1px solid #232C42; }}
+    .telemetry-item:last-child {{ border-right:none; }}
+    .telemetry-num {{ font-size:2.1rem; font-weight:600; color:#19D3C5; }}
+    .telemetry-label {{ font-size:0.74rem; font-weight:500; color:#8A93A6; letter-spacing:0.1em; text-transform:uppercase; margin-top:0.3rem; font-family:'Inter',sans-serif; }}
+</style>
+<div class="telemetry">
+    <div class="telemetry-item"><div class="telemetry-num" data-target="{model_count}">0</div><div class="telemetry-label">Models Supported</div></div>
+    <div class="telemetry-item"><div class="telemetry-num" data-target="{transform_count}">0</div><div class="telemetry-label">Transformations</div></div>
+    <div class="telemetry-item"><div class="telemetry-num" data-target="{mr_count}">0</div><div class="telemetry-label">Metamorphic Relations</div></div>
+    <div class="telemetry-item"><div class="telemetry-num" data-target="{mr_category_count}">0</div><div class="telemetry-label">MR Categories</div></div>
+</div>
+<script>
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelectorAll('.telemetry-num').forEach(counter => {{
+        const target = +counter.getAttribute('data-target');
+        if (reduceMotion) {{ counter.innerText = target; return; }}
+        let count = 0;
+        const step = Math.max(1, Math.ceil(target / 40));
+        const update = () => {{
+            count += step;
+            if (count < target) {{ counter.innerText = count; setTimeout(update, 30); }}
+            else {{ counter.innerText = target; }}
+        }};
+        update();
+    }});
+</script>
+""", height=110)
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  OVERVIEW
+# ──────────────────────────────────────────────────────────────────────────────
+st.markdown('<div id="overview" class="anchor"></div>', unsafe_allow_html=True)
+st.markdown('<div class="section-wrap">', unsafe_allow_html=True)
+st.markdown('<div class="eyebrow">Overview</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-heading">Why Metamorphic Testing</div>', unsafe_allow_html=True)
 st.markdown(
-    f'<div class="stats-strip">'
-        f'<div class="stat-pill"><div class="stat-num">{model_count}</div><div class="stat-label">MODELS SUPPORTED</div></div>'
-        f'<div class="stat-pill"><div class="stat-num">{transform_count}</div><div class="stat-label">TRANSFORMATIONS</div></div>'
-        f'<div class="stat-pill"><div class="stat-num">{mr_count}</div><div class="stat-label">METAMORPHIC RELATIONS</div></div>'
-        f'<div class="stat-pill"><div class="stat-num">{mr_category_count}</div><div class="stat-label">MR CATEGORIES</div></div>'
-    f'</div>',
+    '''
+    <div class="panel">
+        <p>AutoMR tests the <strong>robustness and reliability</strong> of autonomous driving models using
+        <strong>metamorphic testing</strong> - a technique that doesn't need ground-truth labels to catch bugs.</p>
+        <p>It applies realistic transformations, like lighting shifts, weather, noise, and fog, to driving scenes
+        and checks whether the model's output stays consistent with what a defined metamorphic relation expects.</p>
+        <p>This surfaces hidden failure modes that traditional accuracy-based testing typically misses, especially
+        in regression models where there's no simple "correct answer" to test against.</p>
+    </div>
+    ''',
     unsafe_allow_html=True
 )
+st.markdown('</div>', unsafe_allow_html=True)
 
+# ──────────────────────────────────────────────────────────────────────────────
+#  HOW IT WORKS
+# ──────────────────────────────────────────────────────────────────────────────
+st.markdown('<div id="how" class="anchor"></div>', unsafe_allow_html=True)
+st.markdown('<div class="section-wrap">', unsafe_allow_html=True)
+st.markdown('<div class="eyebrow">Pipeline</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-heading">How It Works</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="how-section">'
-        '<div class="how-title">How It Works</div>'
-        '<div class="how-steps">'
-            '<div class="how-step"><div class="how-step-icon">📤</div><div class="how-step-title">1. Pick a Model</div><div class="how-step-desc">Choose a built-in model or upload your own.</div></div>'
-            '<div class="how-arrow">→</div>'
-            '<div class="how-step"><div class="how-step-icon">🌧️</div><div class="how-step-title">2. Apply Transform</div><div class="how-step-desc">Lighting, weather, noise, fog &amp; more.</div></div>'
-            '<div class="how-arrow">→</div>'
-            '<div class="how-step"><div class="how-step-icon">🔍</div><div class="how-step-title">3. Check Relations</div><div class="how-step-desc">Verify metamorphic relations hold.</div></div>'
-            '<div class="how-arrow">→</div>'
-            '<div class="how-step"><div class="how-step-icon">✅</div><div class="how-step-title">4. Get Score</div><div class="how-step-desc">Consistency &amp; robustness results.</div></div>'
-        '</div>'
-    '</div>',
+    '''
+    <div class="pipeline">
+        <div class="pipe-step">
+            <div class="pipe-num">01</div>
+            <div class="pipe-title">Pick a Model</div>
+            <div class="pipe-desc">Choose a built-in model or upload your own .pkl, .h5, .pt or .onnx file.</div>
+        </div>
+        <div class="pipe-step">
+            <div class="pipe-num">02</div>
+            <div class="pipe-title">Apply a Transform</div>
+            <div class="pipe-desc">Lighting, weather, noise, fog, geometric shifts, or composed effects.</div>
+        </div>
+        <div class="pipe-step">
+            <div class="pipe-num">03</div>
+            <div class="pipe-title">Check Relations</div>
+            <div class="pipe-desc">Verify whether the relevant metamorphic relations hold within tolerance.</div>
+        </div>
+        <div class="pipe-step">
+            <div class="pipe-num">04</div>
+            <div class="pipe-title">Get a Score</div>
+            <div class="pipe-desc">Review consistency and robustness results, broken down by category.</div>
+        </div>
+    </div>
+    ''',
     unsafe_allow_html=True
 )
+st.markdown('</div>', unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    if st.button("🚀 Start Testing Now", use_container_width=True, key="start_testing"):
+# ──────────────────────────────────────────────────────────────────────────────
+#  CAPABILITIES
+# ──────────────────────────────────────────────────────────────────────────────
+st.markdown('<div id="capabilities" class="anchor"></div>', unsafe_allow_html=True)
+st.markdown('<div class="section-wrap">', unsafe_allow_html=True)
+st.markdown('<div class="eyebrow">Capabilities</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-heading">What AutoMR Can Do</div>', unsafe_allow_html=True)
+
+features = [
+    ("Single Model Test", "Test any supported model against all applicable metamorphic relations instantly."),
+    ("Cross-Model Analysis", "Compare robustness across multiple architectures side-by-side."),
+    ("Parametric Sweep", "Find the exact transformation intensity where a model starts to fail."),
+    ("Upload Your Model", "Bring .pkl, .h5, .pt or .onnx — auto-detected, validated, and tested."),
+    (f"{transform_count} Transformations", "Weather, lighting, noise, geometric, and composed effects."),
+    ("Statistical Thresholds", "Dataset-driven ε tolerances instead of arbitrary pass/fail cutoffs."),
+    ("Exportable Reports", "Generate a shareable summary of every relation checked and its result."),
+    ("Extensible MR Engine", "Define new metamorphic relations by extending a common base class."),
+]
+
+fcols = st.columns(4)
+for i, (title, desc) in enumerate(features):
+    with fcols[i % 4]:
+        st.markdown(f"""
+        <div class="feature-card">
+            <span class="idx-tag">F{i+1:02d}</span>
+            <div class="feature-title">{title}</div>
+            <div class="feature-desc">{desc}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  MR CATEGORIES
+# ──────────────────────────────────────────────────────────────────────────────
+st.markdown('<div id="categories" class="anchor"></div>', unsafe_allow_html=True)
+st.markdown('<div class="section-wrap">', unsafe_allow_html=True)
+st.markdown('<div class="eyebrow">MR Categories</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-heading">Four Ways We Test Consistency</div>', unsafe_allow_html=True)
+
+st.markdown("""
+<div class="cat-grid">
+    <div class="cat-card" style="--cat-color:#19D3C5;">
+        <div class="cat-tag">Category A</div>
+        <h4>Invariance</h4>
+        <p>Output stays stable under lighting, noise, weather and fog changes that shouldn't affect the result.</p>
+        <span class="cat-formula">|f(x) − f(T(x))| &lt; ε</span>
+    </div>
+    <div class="cat-card" style="--cat-color:#FF6B35;">
+        <div class="cat-tag">Category B</div>
+        <h4>Symmetry</h4>
+        <p>Flipping the scene horizontally should flip the predicted steering angle correspondingly.</p>
+        <span class="cat-formula">f(flip(x)) ≈ −f(x)</span>
+    </div>
+    <div class="cat-card" style="--cat-color:#6C7BFF;">
+        <div class="cat-tag">Category C</div>
+        <h4>Temporal</h4>
+        <p>Consecutive frames in a driving sequence should yield smooth, consistent predictions.</p>
+        <span class="cat-formula">|f(xₜ) − f(xₜ₊₁)| &lt; δ</span>
+    </div>
+    <div class="cat-card" style="--cat-color:#FF5C7A;">
+        <div class="cat-tag">Category D</div>
+        <h4>Composition</h4>
+        <p>Stacking two transformations should still preserve the behavior expected of each on its own.</p>
+        <span class="cat-formula">f(T₂(T₁(x)))</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  SUPPORTED MODELS
+# ──────────────────────────────────────────────────────────────────────────────
+st.markdown('<div id="models" class="anchor"></div>', unsafe_allow_html=True)
+st.markdown('<div class="section-wrap">', unsafe_allow_html=True)
+st.markdown('<div class="eyebrow">Compatibility</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-heading">Works Across Architectures</div>', unsafe_allow_html=True)
+
+models = [
+    ("DAVE-2 (CNN)", "Deep Learning"),
+    ("GPR", "Probabilistic"),
+    ("SVR", "Classical ML"),
+    ("Random Forest", "Ensemble"),
+    ("Linear Regression", "Baseline"),
+    ("CNN Depth", "Deep Learning"),
+]
+mcols = st.columns(6)
+for i, (name, arch) in enumerate(models):
+    with mcols[i]:
+        st.markdown(f"""
+        <div class="model-card">
+            <span class="idx-tag">M{i+1:02d}</span>
+            <div class="model-name">{name}</div>
+            <div class="model-tag">{arch}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  TECH STACK - adjust this list if it doesn't match your actual dependencies
+# ──────────────────────────────────────────────────────────────────────────────
+st.markdown('<div id="stack" class="anchor"></div>', unsafe_allow_html=True)
+st.markdown('<div class="section-wrap">', unsafe_allow_html=True)
+st.markdown('<div class="eyebrow">Built With</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-heading">Technology Stack</div>', unsafe_allow_html=True)
+st.markdown("""
+<div class="stack-row">
+    <span class="stack-pill">Python</span>
+    <span class="stack-pill">Streamlit</span>
+    <span class="stack-pill">TensorFlow / Keras</span>
+    <span class="stack-pill">scikit-learn</span>
+    <span class="stack-pill">NumPy</span>
+    <span class="stack-pill">Pandas</span>
+    <span class="stack-pill">OpenCV</span>
+    <span class="stack-pill">Matplotlib</span>
+</div>
+""", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  CTA BAND
+# ──────────────────────────────────────────────────────────────────────────────
+st.markdown('<div class="section-wrap">', unsafe_allow_html=True)
+st.markdown(
+    '''
+    <div class="cta-band">
+        <h3>Ready to put a model through its paces?</h3>
+        <p>Launch the test console and run your first metamorphic relation in minutes.</p>
+    </div>
+    ''',
+    unsafe_allow_html=True
+)
+st.markdown('<div style="height:1.5rem;"></div>', unsafe_allow_html=True)
+cta1, cta2, cta3 = st.columns([1, 1, 1])
+with cta2:
+    if st.button("Start Testing Now", use_container_width=True, key="cta_start_testing"):
         st.switch_page("pages/App.py")
+st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown("---")
-st.markdown(
-    "<footer>AutoMR - Metamorphic Autodrive Testing Framework | Next-Gen Validation Suite</footer>",
-    unsafe_allow_html=True
-)
+# ──────────────────────────────────────────────────────────────────────────────
+#  ABOUT / AUTHOR
+# ──────────────────────────────────────────────────────────────────────────────
+st.markdown('<div id="about" class="anchor"></div>', unsafe_allow_html=True)
+st.markdown('<div class="section-wrap">', unsafe_allow_html=True)
+st.markdown('<div class="eyebrow">About</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-heading">About This Project</div>', unsafe_allow_html=True)
+st.markdown("""
+<div class="panel">
+    <p><strong>AutoMR</strong> implements "A Generalized Metamorphic Testing Platform for Regression Models
+    in Autonomous Driving Systems" — an undergraduate research project addressing the test oracle problem
+    in regression-based autonomous driving models (steering prediction, trajectory estimation, and lane
+    keeping) through metamorphic testing.</p>
+    <p>Rather than relying on exact expected outputs, the framework defines metamorphic relations — rules
+    that should hold between a source input and a transformed follow-up input — and flags violations as
+    potential faults, even when the "correct" output is unknown.</p>
+    <div class="about-grid">
+        <div>
+            <div class="about-item-label">Team</div>
+            <div class="about-item-value">Akurana B.N.T.M.<br>Pabasara P.M.G.T.<br>Peiris P.R.S.<br>Perera G.C.M.</div>
+        </div>
+        <div>
+            <div class="about-item-label">Supervisor</div>
+            <div class="about-item-value">Dr. Kaveen Liyanage</div>
+        </div>
+        <div>
+            <div class="about-item-label">Co-Supervisor</div>
+            <div class="about-item-value">Mrs. Sithara Mahagama</div>
+        </div>
+        <div>
+            <div class="about-item-label">Institution</div>
+            <div class="about-item-value">Dept. of Electrical and Information Engineering<br>Faculty of Engineering, University of Ruhuna</div>
+        </div>
+    </div>
+    <div class="about-links">
+        <a href="https://github.com/thurunu711/metamorphic-autodrive-testing" target="_blank">🔗 GitHub Repository</a>
+        <a href="mailto:you@email.com"><span class="link-tag">@</span>Contact</a>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  FOOTER
+# ──────────────────────────────────────────────────────────────────────────────
+st.markdown("""
+<footer>
+    <div class="footer-links">
+        <a href="#overview">Overview</a>·
+        <a href="#how">How It Works</a>·
+        <a href="#capabilities">Capabilities</a>·
+        <a href="#categories">Categories</a>·
+        <a href="#models">Models</a>·
+        <a href="#about">About</a>
+    </div>
+    <div>AutoMR - Metamorphic Testing Framework for Autonomous Driving Models</div>
+    <div style="opacity:0.7; margin-top:0.4rem;">© 2026 · Final Year Project, University of Ruhuna</div>
+</footer>
+""", unsafe_allow_html=True)
