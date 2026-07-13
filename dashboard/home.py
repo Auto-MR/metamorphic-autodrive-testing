@@ -40,6 +40,7 @@ TRANSFORM_OPTIONS = [
 model_count = len(MODEL_OPTIONS)
 transform_count = len(TRANSFORM_OPTIONS)
 mr_category_count = 4
+engine_count = 2  # Standard AutoMR + HighPerformanceAutoMR (HPC)
 
 # ──────────────────────────────────────────────────────────────────────────────
 #  PAGE CONFIG
@@ -228,6 +229,18 @@ st.markdown("""
     .cat-card p { font-size: 0.86rem; color: var(--text-muted); line-height: 1.55; }
     .cat-formula { font-family: 'JetBrains Mono', monospace; background: var(--bg-panel-alt); border: 1px solid var(--border-hairline); color: var(--cat-color); padding: 0.45rem 0.7rem; border-radius: 8px; display: inline-block; margin-top: 0.9rem; font-size: 0.78rem; }
 
+    /* ── Engine comparison cards ── */
+    .engine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.2rem; }
+    .engine-card { background: var(--bg-panel); border: 1px solid var(--border-hairline); border-radius: 16px; padding: 1.8rem 1.8rem; }
+    .engine-card.hpc { border-color: rgba(255,107,53,0.35); background: linear-gradient(160deg, var(--bg-panel), var(--bg-panel-alt)); }
+    .engine-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-scan); }
+    .engine-card.hpc .engine-tag { color: var(--accent-signal); }
+    .engine-card h4 { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; color: var(--text-secondary); margin: 0.4rem 0 0.8rem; }
+    .engine-list { list-style: none; display: flex; flex-direction: column; gap: 0.55rem; }
+    .engine-list li { font-size: 0.87rem; color: var(--text-muted); padding-left: 1.2rem; position: relative; line-height: 1.5; }
+    .engine-list li::before { content: "▸"; position: absolute; left: 0; color: var(--accent-scan); }
+    .engine-card.hpc .engine-list li::before { color: var(--accent-signal); }
+
     /* ── Tech stack badges ── */
     .stack-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.7rem; }
     .stack-pill { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--text-secondary); background: var(--bg-panel); border: 1px solid var(--border-hairline); padding: 0.6rem 1.2rem; border-radius: 30px; transition: border-color 0.2s ease, transform 0.2s ease; }
@@ -335,6 +348,7 @@ st.markdown("""
         <a href="#overview">Overview</a>
         <a href="#how">How It Works</a>
         <a href="#capabilities">Capabilities</a>
+        <a href="#engines">Engines</a>
         <a href="#categories">MR Categories</a>
         <a href="#models">Models</a>
         <a href="#about">About</a>
@@ -363,11 +377,13 @@ st.markdown(
             {logo_html}
             <span class="hero-tag">AutoMR</span>
             <h1 class="hero">Stress-test driving<br>models like a <span>sensor sweep</span>.</h1>
-            <p class="hero-subtitle">AutoMR is a generalized metamorphic testing framework for regression-based
-            autonomous driving models - applying realistic transformations and checking whether model behavior
-            stays consistent where it should.</p>
+            <p class="hero-subtitle">AutoMR is a model-agnostic, generalized metamorphic testing framework for
+            regression-based autonomous driving models - applying realistic transformations, checking whether model
+            behavior stays consistent where it should, and scaling from a single sanity check to full HPC-accelerated
+            sweeps with zero ground-truth labels.</p>
             <div class="hero-ctas">
                 <a href="#categories" class="ghost-btn">View MR Categories</a>
+                <a href="#engines" class="ghost-btn">View Execution Engines</a>
             </div>
         </div>
         <div class="hero-visual">
@@ -413,6 +429,7 @@ components.html(f"""
     <div class="telemetry-item"><div class="telemetry-num" data-target="{transform_count}">0</div><div class="telemetry-label">Transformations</div></div>
     <div class="telemetry-item"><div class="telemetry-num" data-target="{mr_count}">0</div><div class="telemetry-label">Metamorphic Relations</div></div>
     <div class="telemetry-item"><div class="telemetry-num" data-target="{mr_category_count}">0</div><div class="telemetry-label">MR Categories</div></div>
+    <div class="telemetry-item"><div class="telemetry-num" data-target="{engine_count}">0</div><div class="telemetry-label">Execution Engines</div></div>
 </div>
 <script>
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -445,6 +462,10 @@ st.markdown(
         <strong>metamorphic testing</strong> - a technique that doesn't need ground-truth labels to catch bugs.</p>
         <p>It applies realistic transformations, like lighting shifts, weather, noise, and fog, to driving scenes
         and checks whether the model's output stays consistent with what a defined metamorphic relation expects.</p>
+        <p>The framework is <strong>model-agnostic</strong> and <strong>backend-agnostic</strong>: any model exposing
+        a <code>predict()</code> interface can be tested, execution can run on CPU or GPU with a single switch, and the
+        same relations scale from a quick single-model check to a full parallel, cache-accelerated sweep across an
+        entire dataset.</p>
         <p>This surfaces hidden failure modes that traditional accuracy-based testing typically misses, especially
         in regression models where there's no simple "correct answer" to test against.</p>
     </div>
@@ -470,18 +491,23 @@ st.markdown(
         </div>
         <div class="pipe-step">
             <div class="pipe-num">02</div>
-            <div class="pipe-title">Apply a Transform</div>
-            <div class="pipe-desc">Lighting, weather, noise, fog, geometric shifts, or composed effects.</div>
+            <div class="pipe-title">Select an Engine</div>
+            <div class="pipe-desc">Standard AutoMR for quick checks, or the HPC engine for parallel, batched, large-scale runs.</div>
         </div>
         <div class="pipe-step">
             <div class="pipe-num">03</div>
-            <div class="pipe-title">Check Relations</div>
-            <div class="pipe-desc">Verify whether the relevant metamorphic relations hold within tolerance.</div>
+            <div class="pipe-title">Apply a Transform</div>
+            <div class="pipe-desc">Lighting, weather, noise, fog, geometric shifts, or composed effects - CPU or GPU.</div>
         </div>
         <div class="pipe-step">
             <div class="pipe-num">04</div>
+            <div class="pipe-title">Check Relations</div>
+            <div class="pipe-desc">Verify whether the relevant metamorphic relations hold within a statistical tolerance.</div>
+        </div>
+        <div class="pipe-step">
+            <div class="pipe-num">05</div>
             <div class="pipe-title">Get a Score</div>
-            <div class="pipe-desc">Review consistency and robustness results, broken down by category.</div>
+            <div class="pipe-desc">Review consistency, robustness, and epsilon-sensitivity results, broken down by category.</div>
         </div>
     </div>
     ''',
@@ -504,8 +530,16 @@ features = [
     ("Upload Your Model", "Bring .pkl, .h5, .pt or .onnx — auto-detected, validated, and tested."),
     (f"{transform_count} Transformations", "Weather, lighting, noise, geometric, and composed effects."),
     ("Statistical Thresholds", "Dataset-driven ε tolerances instead of arbitrary pass/fail cutoffs."),
-    ("Exportable Reports", "Generate a shareable summary of every relation checked and its result."),
+    ("Epsilon Sensitivity Analysis", "Automated threshold sweeps report first-failure, stabilization, and a recommended ε."),
+    ("HPC Execution Engine", "A parallel, batched, cache-accelerated engine for large-scale metamorphic testing."),
+    ("GPU Acceleration", "CUDA-backed transformations with automatic CPU/GPU backend switching."),
+    ("Multi-Framework Support", "Works natively with TensorFlow, PyTorch, scikit-learn, XGBoost, ONNX Runtime, and remote APIs."),
+    ("Batch Inference & Caching", "Baseline predictions are computed once and reused across every MR sweep."),
+    ("Live Testing Dashboard", "Real-time webcam/video evaluation with configurable MRs and adjustable epsilon."),
+    ("Failure & Severity Analysis", "Ranks violations by deviation magnitude and isolates unstable parameter ranges."),
+    ("Exportable Reports", "Generates CSV, JSON, and text reports for every relation checked and its result."),
     ("Extensible MR Engine", "Define new metamorphic relations by extending a common base class."),
+    ("Plugin Architecture", "Register custom transformations and relations at runtime, no core changes needed."),
 ]
 
 fcols = st.columns(4)
@@ -519,6 +553,43 @@ for i, (title, desc) in enumerate(features):
         </div>
         """, unsafe_allow_html=True)
 
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  EXECUTION ENGINES
+# ──────────────────────────────────────────────────────────────────────────────
+st.markdown('<div id="engines" class="anchor"></div>', unsafe_allow_html=True)
+st.markdown('<div class="section-wrap">', unsafe_allow_html=True)
+st.markdown('<div class="eyebrow">Execution</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-heading">Two Engines, One API</div>', unsafe_allow_html=True)
+st.markdown(
+    '''
+    <div class="engine-grid">
+        <div class="engine-card">
+            <div class="engine-tag">Standard</div>
+            <h4>AutoMR Engine</h4>
+            <ul class="engine-list">
+                <li>Sequential execution suited to small and medium datasets</li>
+                <li>CPU or GPU backend, selectable with a single call</li>
+                <li>Full metamorphic relation library and statistical thresholds</li>
+                <li>Ideal for quick, single-model sanity checks</li>
+            </ul>
+        </div>
+        <div class="engine-card hpc">
+            <div class="engine-tag">High-Performance</div>
+            <h4>HighPerformanceAutoMR (HPC)</h4>
+            <ul class="engine-list">
+                <li>Parallel dataset processing across configurable worker threads</li>
+                <li>Batched model inference to cut per-sample overhead</li>
+                <li>Shared baseline prediction cache reused across every MR sweep</li>
+                <li>GPU-accelerated transformations via OpenCV CUDA</li>
+                <li>Built for large-scale, latency-sensitive testing runs</li>
+            </ul>
+        </div>
+    </div>
+    ''',
+    unsafe_allow_html=True
+)
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -586,6 +657,16 @@ for i, (name, arch) in enumerate(models):
         </div>
         """, unsafe_allow_html=True)
 
+st.markdown(
+    '''
+    <p style="text-align:center; color:#8A93A6; font-size:0.86rem; margin-top:1.4rem;">
+    Uploaded models are auto-detected and wrapped through the same pipeline — TensorFlow/Keras, PyTorch,
+    scikit-learn, XGBoost, ONNX Runtime, and remote REST APIs are all supported out of the box.
+    </p>
+    ''',
+    unsafe_allow_html=True
+)
+
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -600,10 +681,13 @@ st.markdown("""
     <span class="stack-pill">Python</span>
     <span class="stack-pill">Streamlit</span>
     <span class="stack-pill">TensorFlow / Keras</span>
+    <span class="stack-pill">PyTorch</span>
     <span class="stack-pill">scikit-learn</span>
+    <span class="stack-pill">XGBoost</span>
+    <span class="stack-pill">ONNX Runtime</span>
     <span class="stack-pill">NumPy</span>
     <span class="stack-pill">Pandas</span>
-    <span class="stack-pill">OpenCV</span>
+    <span class="stack-pill">OpenCV (CUDA)</span>
     <span class="stack-pill">Matplotlib</span>
 </div>
 """, unsafe_allow_html=True)
@@ -644,7 +728,9 @@ st.markdown("""
     keeping) through metamorphic testing.</p>
     <p>Rather than relying on exact expected outputs, the framework defines metamorphic relations — rules
     that should hold between a source input and a transformed follow-up input — and flags violations as
-    potential faults, even when the "correct" output is unknown.</p>
+    potential faults, even when the "correct" output is unknown. Beyond the standard testing engine, the
+    platform includes a High-Performance (HPC) execution mode with parallel processing, batched inference,
+    and prediction caching for evaluating models at scale.</p>
     <div class="about-grid">
         <div>
             <div class="about-item-label">Team</div>
@@ -680,6 +766,7 @@ st.markdown("""
         <a href="#overview">Overview</a>·
         <a href="#how">How It Works</a>·
         <a href="#capabilities">Capabilities</a>·
+        <a href="#engines">Engines</a>·
         <a href="#categories">Categories</a>·
         <a href="#models">Models</a>·
         <a href="#about">About</a>
