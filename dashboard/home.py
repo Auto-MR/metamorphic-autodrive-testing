@@ -140,8 +140,7 @@ st.markdown("""
     /* ── Hero ── */
     .hero-wrap { max-width: 1180px; margin: 0 auto; padding: 1rem 1.5rem 2rem; position: relative; z-index: 5; display: flex; align-items: center; gap: 3rem; flex-wrap: wrap; }
     .hero-content { flex: 1 1 420px; min-width: 320px; }
-    .hero-tag { font-family: 'JetBrains Mono', monospace; font-size: 2rem; letter-spacing: 0.14em; color: var(--accent-signal); text-transform: uppercase; margin-bottom: 1rem; display: inline-block; padding: 0.35rem 0.9rem; border: 1px solid rgba(255,107,53,0.35); border-radius: 30px; background: var(--accent-signal-soft); }
-    .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 3.6rem; font-weight: 800; line-height: 1.05; color: var(--text-primary); letter-spacing: -0.01em; margin-bottom: 1rem; animation: fadeSlideUp 0.7s ease; }
+    .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 3.2rem; font-weight: 800; line-height: 1.12; color: var(--text-primary); letter-spacing: -0.01em; margin-bottom: 1rem; animation: fadeSlideUp 0.7s ease; }
     .hero h1 span { color: var(--accent-scan); }
     @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
     .hero-subtitle { font-size: 1.08rem; font-weight: 400; color: var(--text-muted); max-width: 480px; line-height: 1.65; margin-bottom: 1.8rem; }
@@ -193,6 +192,13 @@ st.markdown("""
     .pipe-desc { font-size: 0.86rem; color: var(--text-muted); line-height: 1.5; }
 
     /* ── Capability / model cards ── */
+    .feature-group-title {
+        font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 600;
+        letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-signal);
+        margin: 2rem 0 0.8rem; display: flex; align-items: center; gap: 0.6rem;
+    }
+    .feature-group-title:first-child { margin-top: 0; }
+    .feature-group-title::after { content: ""; flex: 1; height: 1px; background: var(--border-hairline); }
     .feature-card { background: var(--bg-panel); border: 1px solid var(--border-hairline); border-top: 2px solid transparent; border-radius: 14px; padding: 1.5rem 1.3rem; height: 100%; transition: border-color 0.2s ease, transform 0.2s ease; margin-bottom: 1.1rem; }
     .feature-card:hover { border-top-color: var(--accent-scan); transform: translateY(-4px); }
     .feature-icon { font-size: 1.5rem; }
@@ -240,6 +246,25 @@ st.markdown("""
     .engine-list li { font-size: 0.87rem; color: var(--text-muted); padding-left: 1.2rem; position: relative; line-height: 1.5; }
     .engine-list li::before { content: "▸"; position: absolute; left: 0; color: var(--accent-scan); }
     .engine-card.hpc .engine-list li::before { color: var(--accent-signal); }
+
+    /* ── Example result showcase ── */
+    .example-card { background: var(--bg-panel); border: 1px solid var(--border-hairline); border-radius: 18px; padding: 2rem; max-width: 1000px; margin: 0 auto; }
+    .example-row { display: flex; align-items: center; justify-content: center; gap: 1.4rem; flex-wrap: wrap; }
+    .example-frame { width: 190px; }
+    .example-scene {
+        width: 190px; height: 130px; border-radius: 10px; border: 1px solid var(--border-hairline);
+        display: flex; align-items: center; justify-content: center; font-size: 1.6rem;
+        background: linear-gradient(160deg, #1a2436, #0f1420);
+    }
+    .example-scene.foggy { background: linear-gradient(160deg, #3a4048, #23262d); }
+    .example-caption { text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.6rem; }
+    .example-arrow { font-size: 1.6rem; color: var(--accent-scan); }
+    .example-result { text-align: center; min-width: 190px; }
+    .example-delta { font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; color: var(--text-secondary); font-weight: 600; }
+    .example-delta .old { color: var(--text-muted); }
+    .example-delta .arrow-inline { color: var(--accent-signal); margin: 0 0.4rem; }
+    .example-status { display: inline-block; margin-top: 0.6rem; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; color: #FF5C7A; background: rgba(255,92,122,0.14); border: 1px solid rgba(255,92,122,0.35); padding: 0.3rem 0.8rem; border-radius: 30px; }
+    .example-note { text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 1.6rem; }
 
     /* ── Tech stack badges ── */
     .stack-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.7rem; }
@@ -306,7 +331,7 @@ footer a:hover, footer a:focus-visible { color: var(--accent-scan) !important; o
         .radar-sweep, .radar-blip, .hero h1 { animation: none !important; }
     }
     @media (max-width: 768px) {
-        .hero h1 { font-size: 2.5rem; }
+        .hero h1 { font-size: 2.3rem; }
         .telemetry { flex-wrap: wrap; }
         .telemetry-item { flex: 1 1 45%; border-right: none; border-bottom: 1px solid var(--border-hairline); }
     }
@@ -319,7 +344,7 @@ st.markdown("""
     .block-container {
     position: relative;
     z-index: 5;
-    padding-top: 70px !important;   /* was 0 — pushes content below fixed navbar */
+    padding-top: 70px !important;   /* was 0 - pushes content below fixed navbar */
     margin-top: 0 !important;
     background: transparent !important;}
     section[data-testid="stAppViewContainer"] { background: transparent !important; }
@@ -347,6 +372,7 @@ st.markdown("""
     <div class="navbar-links">
         <a href="#overview">Overview</a>
         <a href="#how">How It Works</a>
+        <a href="#example">Example</a>
         <a href="#capabilities">Capabilities</a>
         <a href="#engines">Engines</a>
         <a href="#categories">MR Categories</a>
@@ -366,8 +392,28 @@ if os.path.exists(logo_path):
         logo_b64 = base64.b64encode(f.read()).decode()
 
 logo_html = (
-    f'<img src="data:image/png;base64,{logo_b64}" style="width:46px;height:46px;border-radius:10px;margin-bottom:1rem;">'
+    f'<img src="data:image/png;base64,{logo_b64}" style="width:300px;height:150px;border-radius:10px;">'
     if logo_b64 else ""
+)
+
+# ── Example section images ──────────────────────────────────────────────────
+def _load_image_b64(filename):
+    path = os.path.join(os.path.dirname(__file__), "images", filename)
+    if os.path.exists(path):
+        with open(path, "rb") as f:
+            return base64.b64encode(f.read()).decode()
+    return None
+
+car_b64 = _load_image_b64("car.png")
+foggy_car_b64 = _load_image_b64("foggy_car.png")
+
+car_scene_html = (
+    f'<img src="data:image/png;base64,{car_b64}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">'
+    if car_b64 else "🛣️"
+)
+foggy_scene_html = (
+    f'<img src="data:image/png;base64,{foggy_car_b64}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">'
+    if foggy_car_b64 else "🌫️"
 )
 
 st.markdown(
@@ -375,15 +421,15 @@ st.markdown(
     <div class="hero-wrap">
         <div class="hero-content">
             {logo_html}
-            <span class="hero-tag">AutoMR</span>
-            <h1 class="hero">Stress-test driving<br>models like a <span>sensor sweep</span>.</h1>
-            <p class="hero-subtitle">AutoMR is a model-agnostic, generalized metamorphic testing framework for
-            regression-based autonomous driving models - applying realistic transformations, checking whether model
-            behavior stays consistent where it should, and scaling from a single sanity check to full HPC-accelerated
-            sweeps with zero ground-truth labels.</p>
+            <h1 class="hero">Find robustness failures,<br>not just <span>accuracy scores</span>.</h1>
+            <p class="hero-subtitle">AutoMR automatically discovers robustness failures in autonomous driving
+            regression models - without requiring ground-truth labels. It applies realistic transformations
+            (lighting, weather, noise) and uses <strong>metamorphic testing</strong> to check whether model
+            behavior stays consistent where it should, scaling from a single sanity check to full
+            HPC-accelerated sweeps.</p>
             <div class="hero-ctas">
+                <a href="#example" class="ghost-btn">See an Example Result</a>
                 <a href="#categories" class="ghost-btn">View MR Categories</a>
-                <a href="#engines" class="ghost-btn">View Execution Engines</a>
             </div>
         </div>
         <div class="hero-visual">
@@ -463,7 +509,7 @@ st.markdown(
         <p>It applies realistic transformations, like lighting shifts, weather, noise, and fog, to driving scenes
         and checks whether the model's output stays consistent with what a defined metamorphic relation expects.</p>
         <p>The framework is <strong>model-agnostic</strong> and <strong>backend-agnostic</strong>: any model exposing
-        a <code>predict()</code> interface can be tested, execution can run on CPU or GPU with a single switch, and the
+        a <code>predict()</code> interface can be tested, execution can run on CPU or optionally on GPU, and the
         same relations scale from a quick single-model check to a full parallel, cache-accelerated sweep across an
         entire dataset.</p>
         <p>This surfaces hidden failure modes that traditional accuracy-based testing typically misses, especially
@@ -497,7 +543,7 @@ st.markdown(
         <div class="pipe-step">
             <div class="pipe-num">03</div>
             <div class="pipe-title">Apply a Transform</div>
-            <div class="pipe-desc">Lighting, weather, noise, fog, geometric shifts, or composed effects - CPU or GPU.</div>
+            <div class="pipe-desc">Lighting, weather, noise, fog, geometric shifts, or composed effects.</div>
         </div>
         <div class="pipe-step">
             <div class="pipe-num">04</div>
@@ -516,6 +562,44 @@ st.markdown(
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ──────────────────────────────────────────────────────────────────────────────
+#  EXAMPLE RESULT
+# ──────────────────────────────────────────────────────────────────────────────
+st.markdown('<div id="example" class="anchor"></div>', unsafe_allow_html=True)
+st.markdown('<div class="section-wrap">', unsafe_allow_html=True)
+st.markdown('<div class="eyebrow">Example</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-heading">Seeing a Violation in Action</div>', unsafe_allow_html=True)
+st.markdown(
+    '''
+    <div class="example-card">
+        <div class="example-row">
+            <div class="example-frame">
+                <div class="example-scene">''' + car_scene_html + '''</div>
+                <div class="example-caption">Original Scene</div>
+            </div>
+            <div class="example-arrow">→ fog →</div>
+            <div class="example-frame">
+                <div class="example-scene foggy">''' + foggy_scene_html + '''</div>
+                <div class="example-caption">Transformed Scene</div>
+            </div>
+            <div class="example-arrow">→</div>
+            <div class="example-result">
+                <div class="example-delta"><span class="old">0.14</span><span class="arrow-inline">→</span>0.73</div>
+                <div class="example-caption" style="margin-top:0.2rem;">Predicted Steering Angle</div>
+                <div class="example-status">MR VIOLATED · FAIL</div>
+            </div>
+        </div>
+        <p class="example-note">
+        Illustrative example - a fog transform pushes the predicted steering angle far outside the statistical
+        tolerance ε, flagging a Category A (Invariance) violation. Run your own model through the test console
+        to generate results like this from real data.
+        </p>
+    </div>
+    ''',
+    unsafe_allow_html=True
+)
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ──────────────────────────────────────────────────────────────────────────────
 #  CAPABILITIES
 # ──────────────────────────────────────────────────────────────────────────────
 st.markdown('<div id="capabilities" class="anchor"></div>', unsafe_allow_html=True)
@@ -523,35 +607,47 @@ st.markdown('<div class="section-wrap">', unsafe_allow_html=True)
 st.markdown('<div class="eyebrow">Capabilities</div>', unsafe_allow_html=True)
 st.markdown('<div class="section-heading">What AutoMR Can Do</div>', unsafe_allow_html=True)
 
-features = [
-    ("Single Model Test", "Test any supported model against all applicable metamorphic relations instantly."),
-    ("Cross-Model Analysis", "Compare robustness across multiple architectures side-by-side."),
-    ("Parametric Sweep", "Find the exact transformation intensity where a model starts to fail."),
-    ("Upload Your Model", "Bring .pkl, .h5, .pt or .onnx — auto-detected, validated, and tested."),
-    (f"{transform_count} Transformations", "Weather, lighting, noise, geometric, and composed effects."),
-    ("Statistical Thresholds", "Dataset-driven ε tolerances instead of arbitrary pass/fail cutoffs."),
-    ("Epsilon Sensitivity Analysis", "Automated threshold sweeps report first-failure, stabilization, and a recommended ε."),
-    ("HPC Execution Engine", "A parallel, batched, cache-accelerated engine for large-scale metamorphic testing."),
-    ("GPU Acceleration", "CUDA-backed transformations with automatic CPU/GPU backend switching."),
-    ("Multi-Framework Support", "Works natively with TensorFlow, PyTorch, scikit-learn, XGBoost, ONNX Runtime, and remote APIs."),
-    ("Batch Inference & Caching", "Baseline predictions are computed once and reused across every MR sweep."),
-    ("Live Testing Dashboard", "Real-time webcam/video evaluation with configurable MRs and adjustable epsilon."),
-    ("Failure & Severity Analysis", "Ranks violations by deviation magnitude and isolates unstable parameter ranges."),
-    ("Exportable Reports", "Generates CSV, JSON, and text reports for every relation checked and its result."),
-    ("Extensible MR Engine", "Define new metamorphic relations by extending a common base class."),
-    ("Plugin Architecture", "Register custom transformations and relations at runtime, no core changes needed."),
+feature_groups = [
+    ("Testing", [
+        ("Single Model Test", "Test any supported model against all applicable metamorphic relations instantly."),
+        ("Cross-Model Analysis", "Compare robustness across multiple architectures side-by-side."),
+        ("Parametric Sweep", "Find the exact transformation intensity where a model starts to fail."),
+        ("Upload Your Model", "Bring .pkl, .h5, .pt or .onnx - auto-detected, validated, and tested."),
+        (f"{transform_count} Transformations", "Weather, lighting, noise, geometric, and composed effects."),
+        ("Statistical Thresholds", "Dataset-driven ε tolerances instead of arbitrary pass/fail cutoffs."),
+    ]),
+    ("Performance", [
+        ("HPC Execution Engine", "A parallel, batched, cache-accelerated engine for large-scale metamorphic testing."),
+        ("Optional CUDA Acceleration", "Optional CUDA acceleration for supported transformations and inference backends."),
+        ("Multi-Framework Support", "Works natively with TensorFlow, PyTorch, scikit-learn, XGBoost, ONNX Runtime, and remote APIs."),
+        ("Batch Inference & Caching", "Baseline predictions are computed once and reused across every MR sweep."),
+    ]),
+    ("Analysis", [
+        ("Epsilon Sensitivity Analysis", "Automated threshold sweeps report first-failure, stabilization, and a recommended ε."),
+        ("Failure & Severity Analysis", "Ranks violations by deviation magnitude and isolates unstable parameter ranges."),
+        ("Live Testing Dashboard", "Real-time webcam/video evaluation with configurable MRs and adjustable epsilon."),
+        ("Exportable Reports", "Generates CSV, JSON, and text reports for every relation checked and its result."),
+    ]),
+    ("Extensibility", [
+        ("Extensible MR Engine", "Define new metamorphic relations by extending a common base class."),
+        ("Plugin Architecture", "Register custom transformations and relations at runtime, no core changes needed."),
+    ]),
 ]
 
-fcols = st.columns(4)
-for i, (title, desc) in enumerate(features):
-    with fcols[i % 4]:
-        st.markdown(f"""
-        <div class="feature-card">
-            <span class="idx-tag">F{i+1:02d}</span>
-            <div class="feature-title">{title}</div>
-            <div class="feature-desc">{desc}</div>
-        </div>
-        """, unsafe_allow_html=True)
+_card_idx = 0
+for group_name, group_features in feature_groups:
+    st.markdown(f'<div class="feature-group-title">{group_name}</div>', unsafe_allow_html=True)
+    gcols = st.columns(4)
+    for i, (title, desc) in enumerate(group_features):
+        _card_idx += 1
+        with gcols[i % 4]:
+            st.markdown(f"""
+            <div class="feature-card">
+                <span class="idx-tag">F{_card_idx:02d}</span>
+                <div class="feature-title">{title}</div>
+                <div class="feature-desc">{desc}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -570,7 +666,7 @@ st.markdown(
             <h4>AutoMR Engine</h4>
             <ul class="engine-list">
                 <li>Sequential execution suited to small and medium datasets</li>
-                <li>CPU or GPU backend, selectable with a single call</li>
+                <li>Runs on CPU, with optional GPU support where available</li>
                 <li>Full metamorphic relation library and statistical thresholds</li>
                 <li>Ideal for quick, single-model sanity checks</li>
             </ul>
@@ -582,7 +678,7 @@ st.markdown(
                 <li>Parallel dataset processing across configurable worker threads</li>
                 <li>Batched model inference to cut per-sample overhead</li>
                 <li>Shared baseline prediction cache reused across every MR sweep</li>
-                <li>GPU-accelerated transformations via OpenCV CUDA</li>
+                <li>Optional CUDA acceleration for supported transformations</li>
                 <li>Built for large-scale, latency-sensitive testing runs</li>
             </ul>
         </div>
@@ -660,7 +756,7 @@ for i, (name, arch) in enumerate(models):
 st.markdown(
     '''
     <p style="text-align:center; color:#8A93A6; font-size:0.86rem; margin-top:1.4rem;">
-    Uploaded models are auto-detected and wrapped through the same pipeline — TensorFlow/Keras, PyTorch,
+    Uploaded models are auto-detected and wrapped through the same pipeline - TensorFlow/Keras, PyTorch,
     scikit-learn, XGBoost, ONNX Runtime, and remote REST APIs are all supported out of the box.
     </p>
     ''',
@@ -687,7 +783,7 @@ st.markdown("""
     <span class="stack-pill">ONNX Runtime</span>
     <span class="stack-pill">NumPy</span>
     <span class="stack-pill">Pandas</span>
-    <span class="stack-pill">OpenCV (CUDA)</span>
+    <span class="stack-pill">OpenCV</span>
     <span class="stack-pill">Matplotlib</span>
 </div>
 """, unsafe_allow_html=True)
@@ -723,11 +819,11 @@ st.markdown('<div class="section-heading">About This Project</div>', unsafe_allo
 st.markdown("""
 <div class="panel">
     <p><strong>AutoMR</strong> implements "A Generalized Metamorphic Testing Platform for Regression Models
-    in Autonomous Driving Systems" — an undergraduate research project addressing the test oracle problem
+    in Autonomous Driving Systems" - an undergraduate research project addressing the test oracle problem
     in regression-based autonomous driving models (steering prediction, trajectory estimation, and lane
     keeping) through metamorphic testing.</p>
-    <p>Rather than relying on exact expected outputs, the framework defines metamorphic relations — rules
-    that should hold between a source input and a transformed follow-up input — and flags violations as
+    <p>Rather than relying on exact expected outputs, the framework defines metamorphic relations - rules
+    that should hold between a source input and a transformed follow-up input - and flags violations as
     potential faults, even when the "correct" output is unknown. Beyond the standard testing engine, the
     platform includes a High-Performance (HPC) execution mode with parallel processing, batched inference,
     and prediction caching for evaluating models at scale.</p>
@@ -765,6 +861,7 @@ st.markdown("""
     <div class="footer-links">
         <a href="#overview">Overview</a>·
         <a href="#how">How It Works</a>·
+        <a href="#example">Example</a>·
         <a href="#capabilities">Capabilities</a>·
         <a href="#engines">Engines</a>·
         <a href="#categories">Categories</a>·
